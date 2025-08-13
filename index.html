@@ -3320,7 +3320,7 @@
             }, 1000);
         }
 
-        function generatePDF() {
+        async function generatePDF() {
             const modal = document.getElementById('downloadModal');
             const progressFill = document.getElementById('progressFill');
             const progressText = document.getElementById('progressText');
@@ -3332,43 +3332,124 @@
             }
             
             modal.style.display = 'flex';
+            progressFill.style.width = '0%';
+            progressText.textContent = 'جاري تحضير الكتيب للتحميل...';
             
-            let progress = 0;
-            const interval = setInterval(() => {
-                progress += Math.random() * 15;
-                if (progress > 100) progress = 100;
+            try {
+                // تحديث المعاينة أولاً
+                updateImageGallery();
+                updatePageCount();
                 
-                progressFill.style.width = progress + '%';
+                // محاكاة التقدم
+                let progress = 0;
+                const updateProgress = (newProgress, message) => {
+                    progress = newProgress;
+                    progressFill.style.width = progress + '%';
+                    progressText.textContent = message;
+                };
                 
-                if (progress < 30) {
-                    progressText.textContent = 'جاري تحضير الصفحات...';
-                } else if (progress < 60) {
-                    progressText.textContent = 'جاري معالجة الصور...';
-                } else if (progress < 90) {
-                    progressText.textContent = 'جاري إنشاء ملف PDF...';
-                } else {
-                    progressText.textContent = 'جاري الانتهاء...';
-                }
+                updateProgress(20, 'جاري تحضير الصفحات...');
+                await new Promise(resolve => setTimeout(resolve, 500));
                 
-                if (progress >= 100) {
-                    clearInterval(interval);
-                    setTimeout(() => {
-                        try {
-                            modal.style.display = 'none';
-                            showSuccessMessage('تم إنشاء ملف PDF بنجاح! 📄 استخدم خيار الطباعة من المتصفح لحفظ الملف');
-                            
-                            // استخدام window.print() بدلاً من محاكاة التحميل
-                            setTimeout(() => {
-                                window.print();
-                            }, 1000);
-                        } catch (error) {
-                            console.error('خطأ في إنشاء PDF:', error);
-                            modal.style.display = 'none';
-                            showSuccessMessage('حدث خطأ في إنشاء PDF. يرجى المحاولة مرة أخرى.');
+                updateProgress(40, 'جاري معالجة المحتوى...');
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                updateProgress(60, 'جاري تحسين الصور...');
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                updateProgress(80, 'جاري إنشاء ملف PDF...');
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                updateProgress(100, 'تم الانتهاء! جاري التحميل...');
+                await new Promise(resolve => setTimeout(resolve, 300));
+                
+                // إخفاء النافذة المنبثقة
+                modal.style.display = 'none';
+                
+                // إنشاء PDF باستخدام html2canvas و jsPDF
+                await createAndDownloadPDF();
+                
+            } catch (error) {
+                console.error('خطأ في إنشاء PDF:', error);
+                modal.style.display = 'none';
+                showSuccessMessage('حدث خطأ في إنشاء PDF. سيتم فتح نافذة الطباعة بدلاً من ذلك.');
+                setTimeout(() => window.print(), 1000);
+            }
+        }
+        
+        async function createAndDownloadPDF() {
+            try {
+                // إنشاء PDF جديد
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF({
+                    orientation: 'portrait',
+                    unit: 'mm',
+                    format: 'a4'
+                });
+                
+                // الحصول على جميع الصفحات
+                const pages = document.querySelectorAll('.page');
+                let isFirstPage = true;
+                
+                for (let i = 0; i < pages.length; i++) {
+                    const page = pages[i];
+                    
+                    // إخفاء رقم الصفحة مؤقتاً للتصوير
+                    const pageNumber = page.querySelector('.page-number');
+                    if (pageNumber) pageNumber.style.display = 'none';
+                    
+                    try {
+                        // تصوير الصفحة
+                        const canvas = await html2canvas(page, {
+                            scale: 2,
+                            useCORS: true,
+                            allowTaint: true,
+                            backgroundColor: '#ffffff',
+                            width: page.offsetWidth,
+                            height: page.offsetHeight,
+                            scrollX: 0,
+                            scrollY: 0
+                        });
+                        
+                        // إعادة إظهار رقم الصفحة
+                        if (pageNumber) pageNumber.style.display = 'block';
+                        
+                        const imgData = canvas.toDataURL('image/jpeg', 0.95);
+                        
+                        // إضافة صفحة جديدة إذا لم تكن الأولى
+                        if (!isFirstPage) {
+                            pdf.addPage();
                         }
-                    }, 500);
+                        isFirstPage = false;
+                        
+                        // إضافة الصورة إلى PDF
+                        const imgWidth = 210; // عرض A4 بالمليمتر
+                        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                        
+                        pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight);
+                        
+                    } catch (pageError) {
+                        console.error(`خطأ في معالجة الصفحة ${i + 1}:`, pageError);
+                        // إعادة إظهار رقم الصفحة في حالة الخطأ
+                        if (pageNumber) pageNumber.style.display = 'block';
+                    }
                 }
-            }, 100);
+                
+                // تحميل الملف
+                const bookletTitle = document.getElementById('bookletTitle').value || 'كتيب-وكالة-التدريب';
+                const fileName = `${bookletTitle.replace(/\s+/g, '-')}-${new Date().getTime()}.pdf`;
+                
+                pdf.save(fileName);
+                showSuccessMessage(`تم تحميل الكتيب بنجاح! 📄 اسم الملف: ${fileName}`);
+                
+            } catch (error) {
+                console.error('خطأ في إنشاء PDF:', error);
+                // في حالة فشل إنشاء PDF، استخدم الطباعة كبديل
+                showSuccessMessage('لم يتمكن من إنشاء PDF. سيتم فتح نافذة الطباعة لحفظ الملف يدوياً.');
+                setTimeout(() => {
+                    window.print();
+                }, 1500);
+            }
         }
 
         function showHelp() {
@@ -3404,5 +3485,5 @@
             updateWordCount();
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96e5d700c0ff9350',t:'MTc1NTA2MzIyOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96e623ac73b49350',t:'MTc1NTA2NjM3MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
