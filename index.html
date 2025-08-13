@@ -1,0 +1,3426 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منشئ الكتيبات الاحترافية - وكالة التدريب</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-dark: #1B4C54;
+            --primary-light: #2D6867;
+            --accent-gray: #D9E0E2;
+            --accent-red: #9E1B32;
+            --white: #FFFFFF;
+            --shadow-main: 0 8px 30px rgba(0, 0, 0, 0.12);
+            --shadow-hover: 0 12px 40px rgba(0, 0, 0, 0.18);
+            --border-radius: 15px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            min-height: 100vh;
+            color: var(--primary-dark);
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        .animated-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: linear-gradient(45deg, #f8fafc, #e2e8f0, #f1f5f9);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-light) 50%, var(--accent-red) 100%);
+            color: var(--white);
+            padding: 2.5rem 0;
+            text-align: center;
+            box-shadow: var(--shadow-main);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="dots" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="1.5" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23dots)"/></svg>');
+            animation: float 20s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 2;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            animation: slideInDown 1s ease;
+        }
+
+        @keyframes slideInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.95;
+            animation: slideInUp 1s ease 0.3s both;
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            gap: 2rem;
+            margin-top: 1.5rem;
+        }
+
+        .sidebar {
+            background: var(--white);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            box-shadow: var(--shadow-main);
+            height: fit-content;
+            position: sticky;
+            top: 1.5rem;
+            border: 1px solid rgba(27, 76, 84, 0.1);
+        }
+
+        .section {
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 2px solid var(--accent-gray);
+            position: relative;
+        }
+
+        .section::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 60px;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary-light), var(--accent-red));
+            border-radius: 1px;
+        }
+
+        .section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .section:last-child::after {
+            display: none;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 8px;
+            transition: var(--transition);
+        }
+
+        .section-header:hover {
+            background: rgba(45, 104, 103, 0.05);
+        }
+
+        .section h3 {
+            color: var(--primary-dark);
+            font-size: 1.3rem;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            font-weight: 600;
+            flex: 1;
+        }
+
+        .toggle-btn {
+            background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-dark) 100%);
+            color: var(--white);
+            border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            transition: var(--transition);
+            box-shadow: 0 3px 10px rgba(45, 104, 103, 0.3);
+        }
+
+        .toggle-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 15px rgba(45, 104, 103, 0.4);
+        }
+
+        .toggle-icon {
+            transition: transform 0.3s ease;
+            font-weight: bold;
+        }
+
+        .section.expanded .toggle-icon {
+            transform: rotate(45deg);
+        }
+
+        .section-content {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .section.expanded .section-content {
+            max-height: 2000px;
+            opacity: 1;
+        }
+
+        .template-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .template-card {
+            background: linear-gradient(135deg, var(--accent-gray) 0%, #f8f9fa 100%);
+            border-radius: 12px;
+            padding: 1.2rem 0.8rem;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            border: 2px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .template-card:hover, .template-card.active {
+            background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-dark) 100%);
+            color: var(--white);
+            border-color: var(--accent-red);
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 8px 20px rgba(45, 104, 103, 0.3);
+        }
+
+        .template-card .icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .template-card .name {
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            display: block;
+            width: 100%;
+            margin-bottom: 1.5rem;
+        }
+
+        .file-input {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-input-label {
+            display: block;
+            background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-dark) 100%);
+            color: var(--white);
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 600;
+            font-size: 0.9rem;
+            border: none;
+            box-shadow: 0 4px 15px rgba(45, 104, 103, 0.3);
+        }
+
+        .file-input-label:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(45, 104, 103, 0.4);
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 0.8rem;
+            font-weight: 600;
+            color: var(--primary-dark);
+            font-size: 0.9rem;
+        }
+
+        .input-group input, .input-group textarea, .input-group select {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 2px solid var(--accent-gray);
+            border-radius: 8px;
+            font-family: 'Cairo', sans-serif;
+            font-size: 0.85rem;
+            transition: var(--transition);
+            background: var(--white);
+        }
+
+        .input-group input:focus, .input-group textarea:focus, .input-group select:focus {
+            outline: none;
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 3px rgba(45, 104, 103, 0.1);
+        }
+
+        .input-group textarea {
+            resize: vertical;
+            min-height: 100px;
+            line-height: 1.5;
+        }
+
+        .color-palette {
+            display: flex;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+
+        .color-option {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: var(--transition);
+            position: relative;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+        }
+
+        .color-option:hover, .color-option.active {
+            border-color: var(--primary-dark);
+            transform: scale(1.15);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.25);
+        }
+
+        .color-option.active::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: var(--white);
+            font-weight: bold;
+            font-size: 1.1rem;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+
+        .preview-area {
+            background: var(--white);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            box-shadow: var(--shadow-main);
+            min-height: 600px;
+            border: 1px solid rgba(27, 76, 84, 0.1);
+        }
+
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 3px solid var(--accent-gray);
+            position: relative;
+        }
+
+        .preview-header::after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: 0;
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary-light), var(--accent-red));
+            border-radius: 2px;
+        }
+
+        .preview-header h2 {
+            color: var(--primary-dark);
+            font-size: 1.6rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Cairo', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 0.85rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-red) 0%, #7d1426 100%);
+            color: var(--white);
+            box-shadow: 0 4px 15px rgba(158, 27, 50, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(158, 27, 50, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-dark) 100%);
+            color: var(--white);
+            box-shadow: 0 4px 15px rgba(45, 104, 103, 0.3);
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(45, 104, 103, 0.4);
+        }
+
+        .booklet-preview {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border: 2px solid var(--accent-gray);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            box-shadow: inset 0 3px 10px rgba(0,0,0,0.05);
+            min-height: 500px;
+            max-height: 700px;
+            overflow-y: auto;
+        }
+
+        .page {
+            margin-bottom: 2.5rem;
+            padding: 2cm;
+            border: 2px dashed var(--accent-gray);
+            border-radius: 12px;
+            width: 21cm;
+            height: 29.7cm;
+            position: relative;
+            background: var(--white);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            transition: var(--transition);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            page-break-after: always;
+            box-sizing: border-box;
+        }
+
+        .page:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            border-color: var(--primary-light);
+        }
+
+        .page-number {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-dark) 100%);
+            color: var(--white);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            box-shadow: 0 3px 10px rgba(45, 104, 103, 0.3);
+        }
+
+        .cover-page {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-light) 50%, var(--accent-red) 100%);
+            color: var(--white);
+            text-align: center;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cover-content {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100%;
+            padding: 1.5rem;
+        }
+
+        .cover-text-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            margin-top: 1.5rem;
+        }
+
+        .cover-title {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            line-height: 1.2;
+        }
+
+        .cover-subtitle {
+            font-size: 1.2rem;
+            opacity: 0.95;
+            margin-bottom: 2rem;
+            font-weight: 400;
+        }
+
+        .logo-container {
+            width: 250px;
+            height: 200px;
+            background: transparent;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 6rem;
+            border: none;
+            box-shadow: none;
+            transition: var(--transition);
+            margin-bottom: 1rem;
+        }
+
+        .logo-container:hover {
+            transform: scale(1.05);
+        }
+
+        .logo-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 6px;
+            padding: 3px;
+        }
+
+        .content-page {
+            background: var(--white);
+            justify-content: flex-start;
+        }
+
+        .content-page .content-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100%;
+        }
+
+        .content-title {
+            color: var(--primary-dark);
+            font-size: 1.4rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 3px solid var(--primary-light);
+            padding-bottom: 0.8rem;
+            font-weight: 700;
+            position: relative;
+        }
+
+        .content-title::after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: 0;
+            width: 50px;
+            height: 3px;
+            background: var(--accent-red);
+            border-radius: 2px;
+        }
+
+        .content-text {
+            line-height: 1.7;
+            font-size: 1rem;
+            color: #333;
+            margin-bottom: 1.5rem;
+            text-align: justify;
+        }
+
+        .uploaded-images {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 1.5rem;
+        }
+
+        .uploaded-image {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 3px solid var(--accent-gray);
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .uploaded-image:hover {
+            border-color: var(--primary-light);
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(45, 104, 103, 0.3);
+        }
+
+        .image-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .gallery-item {
+            background: linear-gradient(135deg, var(--accent-gray) 0%, #f8f9fa 100%);
+            height: 150px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: var(--transition);
+            border: 2px solid transparent;
+        }
+
+        .gallery-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            border-color: var(--primary-light);
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .contact-info {
+            text-align: center;
+            margin-top: 2rem;
+            padding: 2rem;
+            background: linear-gradient(135deg, var(--accent-gray) 0%, rgba(217, 224, 226, 0.6) 100%);
+            border-radius: 15px;
+            border: 2px solid rgba(45, 104, 103, 0.15);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+
+        .contact-info h3 {
+            color: var(--primary-dark);
+            margin-bottom: 1.5rem;
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        .contact-info div {
+            margin: 0.8rem 0;
+            font-size: 0.95rem;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 1.2rem 1rem;
+            background: linear-gradient(135deg, rgba(45, 104, 103, 0.1) 0%, rgba(45, 104, 103, 0.05) 100%);
+            border-radius: 12px;
+            border: 2px solid rgba(45, 104, 103, 0.2);
+            transition: var(--transition);
+        }
+
+        .stat-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(45, 104, 103, 0.15);
+            border-color: var(--primary-light);
+        }
+
+        .stat-number {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 0.5rem;
+            font-weight: 600;
+        }
+
+        .floating-help {
+            position: fixed;
+            bottom: 2rem;
+            left: 2rem;
+            background: linear-gradient(135deg, var(--accent-red) 0%, #7d1426 100%);
+            color: var(--white);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(158, 27, 50, 0.4);
+            transition: var(--transition);
+            z-index: 1000;
+        }
+
+        .floating-help:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 25px rgba(158, 27, 50, 0.5);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: var(--white);
+            padding: 3rem;
+            border-radius: 20px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            border: 2px solid var(--primary-light);
+        }
+
+        .modal h3 {
+            color: var(--primary-dark);
+            margin-bottom: 1.5rem;
+            font-size: 1.6rem;
+            font-weight: 700;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: var(--accent-gray);
+            border-radius: 6px;
+            overflow: hidden;
+            margin: 2rem 0;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-light) 0%, var(--accent-red) 100%);
+            width: 0%;
+            transition: width 0.4s ease;
+            border-radius: 6px;
+        }
+
+        .success-message {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.9rem;
+            box-shadow: 0 5px 15px rgba(16, 185, 129, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* تحسينات الاستجابة */
+        @media (max-width: 1200px) {
+            .main-content {
+                grid-template-columns: 320px 1fr;
+                gap: 1.5rem;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+
+        @media (max-width: 968px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+            
+            .sidebar {
+                position: static;
+            }
+            
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .cover-title {
+                font-size: 1.8rem;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .header {
+                padding: 2rem 0;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .sidebar, .preview-area {
+                padding: 1.5rem;
+            }
+            
+            .page {
+                padding: 2rem;
+                min-height: 500px;
+                max-height: 500px;
+            }
+            
+            .cover-title {
+                font-size: 1.6rem;
+            }
+            
+            .floating-help {
+                bottom: 1.5rem;
+                left: 1.5rem;
+                width: 45px;
+                height: 45px;
+                font-size: 1.1rem;
+            }
+        }
+
+        /* أنماط الطباعة */
+        @media print {
+            body {
+                background: white !important;
+                font-size: 12pt;
+                line-height: 1.4;
+            }
+            
+            .header, .sidebar, .preview-header, .action-buttons, .floating-help, .modal {
+                display: none !important;
+            }
+            
+            .main-content {
+                grid-template-columns: 1fr !important;
+                gap: 0 !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            
+            .container {
+                max-width: none !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            
+            .preview-area {
+                box-shadow: none !important;
+                border: none !important;
+                border-radius: 0 !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            
+            .booklet-preview {
+                background: white !important;
+                border: none !important;
+                border-radius: 0 !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                box-shadow: none !important;
+                max-height: none !important;
+                overflow: visible !important;
+            }
+            
+            .page {
+                width: 21cm !important;
+                height: 29.7cm !important;
+                margin: 0 !important;
+                padding: 2cm !important;
+                border: none !important;
+                border-radius: 0 !important;
+                box-shadow: none !important;
+                page-break-after: always !important;
+                overflow: visible !important;
+                background: white !important;
+            }
+            
+            .page:last-child {
+                page-break-after: avoid !important;
+            }
+            
+            .page-number {
+                position: absolute !important;
+                top: 1cm !important;
+                left: 1cm !important;
+                background: transparent !important;
+                color: #333 !important;
+                font-size: 10pt !important;
+                padding: 0 !important;
+                border-radius: 0 !important;
+                box-shadow: none !important;
+            }
+            
+            /* تحسين النصوص للطباعة */
+            h1, h2, h3 {
+                color: #000 !important;
+                page-break-after: avoid !important;
+            }
+            
+            p {
+                color: #333 !important;
+                orphans: 3 !important;
+                widows: 3 !important;
+            }
+            
+            /* تحسين الصور للطباعة */
+            img {
+                max-width: 100% !important;
+                height: auto !important;
+                page-break-inside: avoid !important;
+            }
+            
+            /* إخفاء العناصر التفاعلية */
+            button, .btn {
+                display: none !important;
+            }
+            
+            /* تحسين الألوان للطباعة */
+            .cover-page {
+                background: linear-gradient(135deg, #1B4C54 0%, #2D6867 50%, #9E1B32 100%) !important;
+                color: white !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            
+            /* تحسين التخطيط للطباعة */
+            .image-layout {
+                page-break-inside: avoid !important;
+            }
+            
+            .content-wrapper {
+                height: auto !important;
+            }
+        }
+
+        /* تحسينات خاصة بصفحات الصور على الأجهزة المحمولة */
+        @media (max-width: 768px) {
+            .page .image-layout {
+                flex-direction: column !important;
+                gap: 1.5rem !important;
+            }
+            
+            .page .image-layout .image-container,
+            .page .image-layout .description-container {
+                flex: none !important;
+                width: 100% !important;
+            }
+            
+            .page .image-layout .description-container {
+                text-align: center !important;
+            }
+        }
+
+        /* أنماط القوالب الخاصة بالجامعة الأمنية - تصاميم احترافية متنوعة */
+        
+        /* القالب الأول: التصميم الهندسي الحديث */
+        .template-1 {
+            background: linear-gradient(135deg, #0f172a 0%, var(--primary-dark) 40%, var(--primary-light) 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .template-1::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 300px;
+            height: 300px;
+            background: conic-gradient(from 0deg, transparent, rgba(217, 224, 226, 0.1), transparent);
+            border-radius: 50%;
+            animation: rotate 20s linear infinite;
+        }
+
+        .template-1::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 40%;
+            background: linear-gradient(45deg, 
+                transparent 30%, 
+                rgba(217, 224, 226, 0.05) 31%, 
+                rgba(217, 224, 226, 0.05) 32%, 
+                transparent 33%,
+                transparent 40%, 
+                rgba(217, 224, 226, 0.03) 41%, 
+                rgba(217, 224, 226, 0.03) 42%, 
+                transparent 43%
+            );
+        }
+
+        /* القالب الثاني: التصميم المؤسسي الفاخر */
+        .template-2 {
+            background: radial-gradient(ellipse at top, var(--primary-light) 0%, var(--primary-dark) 50%, #0f172a 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .template-2::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 150px;
+            background: linear-gradient(180deg, 
+                rgba(217, 224, 226, 0.15) 0%, 
+                rgba(217, 224, 226, 0.08) 30%,
+                transparent 100%
+            );
+            clip-path: polygon(0 0, 100% 0, 85% 100%, 0 80%);
+        }
+
+        .template-2::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, 
+                rgba(158, 27, 50, 0.2) 0%, 
+                rgba(158, 27, 50, 0.1) 40%, 
+                transparent 70%
+            );
+            border-radius: 50%;
+            transform: translate(50%, 50%);
+        }
+
+        /* القالب الثالث: التصميم العسكري المتطور */
+        .template-3 {
+            background: linear-gradient(45deg, 
+                var(--accent-red) 0%, 
+                #7d1426 25%, 
+                var(--primary-dark) 50%, 
+                var(--primary-light) 75%, 
+                var(--accent-red) 100%
+            );
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .template-3::before {
+            content: '';
+            position: absolute;
+            top: 20%;
+            right: 15%;
+            width: 120px;
+            height: 120px;
+            border: 3px solid rgba(217, 224, 226, 0.2);
+            border-radius: 50%;
+            border-top-color: rgba(217, 224, 226, 0.4);
+            border-right-color: rgba(217, 224, 226, 0.4);
+            animation: rotate 10s linear infinite;
+        }
+
+        .template-3::after {
+            content: '';
+            position: absolute;
+            bottom: 10%;
+            left: 10%;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 0 0 60px 60px;
+            border-color: transparent transparent rgba(217, 224, 226, 0.1) transparent;
+        }
+
+        /* القالب الرابع: التصميم التقني المبتكر */
+        .template-4 {
+            background: linear-gradient(135deg, 
+                #0f172a 0%, 
+                var(--primary-dark) 20%, 
+                var(--accent-red) 40%, 
+                var(--primary-light) 60%, 
+                var(--primary-dark) 80%, 
+                #0f172a 100%
+            );
+            position: relative;
+            overflow: hidden;
+        }
+
+        .template-4::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(45deg, transparent 40%, rgba(217, 224, 226, 0.03) 50%, transparent 60%),
+                linear-gradient(-45deg, transparent 40%, rgba(217, 224, 226, 0.03) 50%, transparent 60%);
+            background-size: 60px 60px, 60px 60px;
+            background-position: 0 0, 30px 30px;
+        }
+
+        .template-4::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 250px;
+            height: 250px;
+            background: conic-gradient(
+                from 45deg,
+                transparent,
+                rgba(158, 27, 50, 0.1),
+                transparent,
+                rgba(45, 104, 103, 0.1),
+                transparent
+            );
+            border-radius: 50%;
+            transform: translate(30%, 30%);
+            animation: rotate 25s linear infinite reverse;
+        }
+
+        /* القالب الخامس: التصميم الأكاديمي الراقي */
+        .template-5 {
+            background: 
+                radial-gradient(circle at 20% 20%, rgba(217, 224, 226, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(158, 27, 50, 0.1) 0%, transparent 50%),
+                linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-light) 50%, var(--accent-red) 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .template-5::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                repeating-linear-gradient(
+                    45deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(217, 224, 226, 0.02) 2px,
+                    rgba(217, 224, 226, 0.02) 4px
+                );
+        }
+
+        .template-5::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(
+                circle,
+                rgba(255, 255, 255, 0.05) 0%,
+                rgba(255, 255, 255, 0.02) 30%,
+                transparent 70%
+            );
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        /* الحركات والتأثيرات */
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { 
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 0.5;
+            }
+            50% { 
+                transform: translate(-50%, -50%) scale(1.1);
+                opacity: 0.8;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="animated-bg"></div>
+    
+    <div class="header">
+        <div class="header-content">
+            <h1>🎓 منشئ الكتيبات الاحترافية - وكالة التدريب</h1>
+            <p>أداة متطورة لإنشاء كتيبات تعليمية احترافية بهوية وكالة التدريب</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="main-content">
+            <div class="sidebar">
+                <div class="section" id="templateSection">
+                    <div class="section-header" onclick="toggleSection('templateSection')">
+                        <h3>🎨 القوالب الرسمية</h3>
+                        <button class="toggle-btn" title="إخفاء/إظهار القسم">
+                            <span class="toggle-icon">+</span>
+                        </button>
+                    </div>
+                    <div class="section-content">
+                        <div class="template-grid">
+                            <div class="template-card active" data-template="1">
+                                <span class="icon">🏛️</span>
+                                <span class="name">رسمي كلاسيكي</span>
+                            </div>
+                            <div class="template-card" data-template="2">
+                                <span class="icon">⚖️</span>
+                                <span class="name">أمني متقدم</span>
+                            </div>
+                            <div class="template-card" data-template="3">
+                                <span class="icon">🎖️</span>
+                                <span class="name">عسكري أنيق</span>
+                            </div>
+                            <div class="template-card" data-template="4">
+                                <span class="icon">🛡️</span>
+                                <span class="name">أمني حديث</span>
+                            </div>
+                            <div class="template-card" data-template="5">
+                                <span class="icon">🏆</span>
+                                <span class="name">تميز أكاديمي</span>
+                            </div>
+                        </div>
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <span class="stat-number" id="pageCount">4</span>
+                                <span class="stat-label">صفحات</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-number" id="imageCount">0</span>
+                                <span class="stat-label">صور</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-number" id="wordCount">0</span>
+                                <span class="stat-label">كلمة</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section" id="logoSection">
+                    <div class="section-header" onclick="toggleSection('logoSection')">
+                        <h3>🏛️ شعار الجامعة</h3>
+                        <button class="toggle-btn" title="إخفاء/إظهار القسم">
+                            <span class="toggle-icon">+</span>
+                        </button>
+                    </div>
+                    <div class="section-content">
+                        <div class="file-input-wrapper">
+                            <input type="file" id="logoUpload" class="file-input" accept="image/*">
+                            <label for="logoUpload" class="file-input-label">🏛️ ارفع شعار وكالة التدريب</label>
+                        </div>
+                        <div class="uploaded-images" id="uploadedLogo"></div>
+                        <p style="font-size: 0.8rem; color: #666; margin-top: 1rem; text-align: center; font-style: italic;">
+                            💡 الشعار سيظهر في صفحة الغلاف - يُفضل صورة عالية الجودة
+                        </p>
+                    </div>
+                </div>
+
+                <div class="section" id="imagesSection">
+                    <div class="section-header" onclick="toggleSection('imagesSection')">
+                        <h3>📷 صور توضيحية</h3>
+                        <button class="toggle-btn" title="إخفاء/إظهار القسم">
+                            <span class="toggle-icon">+</span>
+                        </button>
+                    </div>
+                    <div class="section-content">
+                        <div class="file-input-wrapper">
+                            <input type="file" id="imagesUpload" class="file-input" accept="image/*" multiple>
+                            <label for="imagesUpload" class="file-input-label">📤 ارفع الصور التوضيحية</label>
+                        </div>
+                        <div class="uploaded-images" id="uploadedImages"></div>
+                        <p style="font-size: 0.8rem; color: #666; margin-top: 1rem; text-align: center; font-style: italic;">
+                            💡 كل صورة ستظهر في صفحة منفصلة مع إمكانية التعديل
+                        </p>
+                    </div>
+                </div>
+
+                <div class="section" id="contentSection">
+                    <div class="section-header" onclick="toggleSection('contentSection')">
+                        <h3>✏️ محتوى الكتيب</h3>
+                        <button class="toggle-btn" title="إخفاء/إظهار القسم">
+                            <span class="toggle-icon">+</span>
+                        </button>
+                    </div>
+                    <div class="section-content">
+                        <div class="input-group">
+                            <label>عنوان الكتيب الرئيسي</label>
+                            <input type="text" id="bookletTitle" placeholder="أدخل عنوان الكتيب" value="دليل التسجيل في منصة LMS">
+                        </div>
+                        <div class="input-group">
+                            <label>العنوان الفرعي</label>
+                            <input type="text" id="bookletSubtitle" placeholder="العنوان الفرعي" value="خطوات سهلة ومبسطة للبدء في رحلة التعلم الإلكتروني">
+                        </div>
+                        <div class="input-group">
+                            <label>نقاط الغلاف الرئيسية</label>
+                            <div style="display: grid; gap: 0.8rem;">
+                                <input type="text" id="coverPoint1" placeholder="النقطة الأولى" value="دليل شامل ومصور">
+                                <input type="text" id="coverPoint2" placeholder="النقطة الثانية" value="خطوات سهلة ومبسطة">
+                                <input type="text" id="coverPoint3" placeholder="النقطة الثالثة" value="التعلم الإلكتروني">
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>نص المقدمة</label>
+                            <textarea id="introText" placeholder="اكتب المقدمة هنا">مرحباً بك في دليل التسجيل الشامل لمنصة التعلم الإلكتروني (LMS). هذا الدليل المصور سيساعدك على فهم جميع خطوات التسجيل والبدء في استخدام المنصة بسهولة ويسر.</textarea>
+                        </div>
+                        <div class="input-group">
+                            <label>المحتوى الرئيسي</label>
+                            <textarea id="mainContent" placeholder="المحتوى التفصيلي">خطوات التسجيل في منصة LMS:
+
+🔹 الخطوة الأولى: الدخول إلى الموقع الرسمي
+🔹 الخطوة الثانية: النقر على "إنشاء حساب جديد"
+🔹 الخطوة الثالثة: ملء البيانات الشخصية المطلوبة
+🔹 الخطوة الرابعة: التحقق من البريد الإلكتروني
+🔹 الخطوة الخامسة: تفعيل الحساب
+
+ما ستحتاجه للتسجيل:
+✅ بريد إلكتروني صالح ونشط
+✅ رقم هاتف محمول للتحقق
+✅ معلومات شخصية أساسية</textarea>
+                        </div>
+                        <div class="input-group">
+                            <label>نص الخاتمة</label>
+                            <textarea id="conclusionText" placeholder="اكتب الخاتمة">تهانينا! لقد أكملت جميع خطوات التسجيل في منصة LMS بنجاح. الآن يمكنك البدء في استكشاف المحتوى التعليمي والاستفادة من جميع الميزات المتاحة.</textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section" id="colorsSection">
+                    <div class="section-header" onclick="toggleSection('colorsSection')">
+                        <h3>🎨 ألوان الهوية</h3>
+                        <button class="toggle-btn" title="إخفاء/إظهار القسم">
+                            <span class="toggle-icon">+</span>
+                        </button>
+                    </div>
+                    <div class="section-content">
+                        <div class="color-palette">
+                            <div class="color-option active" style="background: #1B4C54" data-color="#1B4C54" title="الأزرق المخضر الداكن"></div>
+                            <div class="color-option" style="background: #2D6867" data-color="#2D6867" title="الأزرق المخضر الفاتح"></div>
+                            <div class="color-option" style="background: #D9E0E2" data-color="#D9E0E2" title="الرمادي الفاتح"></div>
+                            <div class="color-option" style="background: #9E1B32" data-color="#9E1B32" title="الأحمر الداكن"></div>
+                            <div class="color-option" style="background: #FFFFFF; border: 2px solid #ccc" data-color="#FFFFFF" title="الأبيض"></div>
+                        </div>
+                        <div class="input-group">
+                            <label>حجم الخط</label>
+                            <select id="fontSize">
+                                <option value="small">صغير - للمحتوى المكثف</option>
+                                <option value="medium" selected>متوسط - الحجم المثالي</option>
+                                <option value="large">كبير - سهل القراءة</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>نمط الخط</label>
+                            <select id="fontStyle">
+                                <option value="cairo" selected>Cairo - خط عصري</option>
+                                <option value="amiri">Amiri - خط تقليدي</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section" id="contactSection">
+                    <div class="section-header" onclick="toggleSection('contactSection')">
+                        <h3>📞 معلومات التواصل</h3>
+                        <button class="toggle-btn" title="إخفاء/إظهار القسم">
+                            <span class="toggle-icon">+</span>
+                        </button>
+                    </div>
+                    <div class="section-content">
+                        <div class="input-group">
+                            <label>البريد الإلكتروني</label>
+                            <input type="email" id="contactEmail" placeholder="أدخل البريد الإلكتروني" value="info@psu.edu.sa">
+                        </div>
+                        <div class="input-group">
+                            <label>رقم الهاتف</label>
+                            <input type="tel" id="contactPhone" placeholder="أدخل رقم الهاتف" value="+966 11 123 4567">
+                        </div>
+                        <div class="input-group">
+                            <label>الموقع الإلكتروني</label>
+                            <input type="url" id="contactWebsite" placeholder="أدخل الموقع الإلكتروني" value="www.psu.edu.sa">
+                        </div>
+                        <div class="input-group">
+                            <label>العنوان</label>
+                            <input type="text" id="contactAddress" placeholder="أدخل العنوان" value="الرياض، المملكة العربية السعودية">
+                        </div>
+                        <div class="input-group">
+                            <label>اسم المشرف</label>
+                            <input type="text" id="supervisorName" placeholder="أدخل اسم المشرف" value="د. أحمد محمد العلي">
+                        </div>
+                        <div class="input-group">
+                            <label>رقم جوال المشرف</label>
+                            <input type="tel" id="supervisorPhone" placeholder="أدخل رقم جوال المشرف" value="+966 50 123 4567">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="preview-area">
+                <div class="preview-header">
+                    <h2>👁️ معاينة الكتيب</h2>
+                    <div class="action-buttons">
+                        <button class="btn btn-secondary" onclick="previewBooklet()">🔄 تحديث المعاينة</button>
+                        <button class="btn btn-secondary" onclick="printBooklet()">🖨️ طباعة مباشرة</button>
+                        <button class="btn btn-primary" onclick="generatePDF()">📄 تحميل PDF</button>
+                    </div>
+                </div>
+
+                <div class="booklet-preview" id="bookletPreview">
+                    <!-- صفحة الغلاف -->
+                    <div class="page cover-page template-1" id="coverPage">
+                        <div class="page-number">الغلاف</div>
+                        <div class="cover-content">
+                            <!-- شعار الجامعة في الأعلى -->
+                            <div style="text-align: center; margin-bottom: 2rem;">
+                                <div class="logo-container" id="logoContainer" style="
+                                    width: 250px;
+                                    height: 200px;
+                                    background: transparent;
+                                    border-radius: 15px;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                    font-size: 6rem;
+                                    border: none;
+                                    box-shadow: none;
+                                    transition: var(--transition);
+                                    margin: 0 auto;
+                                ">🎓</div>
+                            </div>
+                            
+                            <!-- المحتوى النصي الرئيسي -->
+                            <div class="cover-text-content">
+                                <h1 class="cover-title" id="previewTitle" style="font-size: 2rem; line-height: 1.2; margin-bottom: 1.5rem;">دليل التسجيل في منصة LMS</h1>
+                                <p class="cover-subtitle" id="previewSubtitle" style="font-size: 1.1rem; line-height: 1.4; margin-bottom: 2rem;">خطوات سهلة ومبسطة للبدء في رحلة التعلم الإلكتروني</p>
+                                
+                                <!-- النقاط الرئيسية بتصميم محسن -->
+                                <div style="
+                                    margin: 2rem 0;
+                                    display: grid;
+                                    grid-template-columns: 1fr;
+                                    gap: 1rem;
+                                    max-width: 450px;
+                                    margin-left: auto;
+                                    margin-right: auto;
+                                " id="coverPointsContainer">
+                                    <div style="
+                                        background: rgba(255,255,255,0.15);
+                                        backdrop-filter: blur(10px);
+                                        border-radius: 15px;
+                                        padding: 1rem;
+                                        display: flex;
+                                        align-items: center;
+                                        gap: 1.2rem;
+                                        border: 1px solid rgba(255,255,255,0.2);
+                                        box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+                                    ">
+                                        <div style="
+                                            background: rgba(255,255,255,0.2);
+                                            border-radius: 50%;
+                                            width: 50px;
+                                            height: 50px;
+                                            display: flex;
+                                            align-items: center;
+                                            justify-content: center;
+                                            font-size: 1.5rem;
+                                            flex-shrink: 0;
+                                        ">📚</div>
+                                        <span style="
+                                            font-size: 1.1rem;
+                                            font-weight: 600;
+                                            text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+                                        " id="previewCoverPoint1">دليل شامل ومصور</span>
+                                    </div>
+                                    
+                                    <div style="
+                                        background: rgba(255,255,255,0.15);
+                                        backdrop-filter: blur(10px);
+                                        border-radius: 15px;
+                                        padding: 1rem;
+                                        display: flex;
+                                        align-items: center;
+                                        gap: 1.2rem;
+                                        border: 1px solid rgba(255,255,255,0.2);
+                                        box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+                                    ">
+                                        <div style="
+                                            background: rgba(255,255,255,0.2);
+                                            border-radius: 50%;
+                                            width: 50px;
+                                            height: 50px;
+                                            display: flex;
+                                            align-items: center;
+                                            justify-content: center;
+                                            font-size: 1.5rem;
+                                            flex-shrink: 0;
+                                        ">🎯</div>
+                                        <span style="
+                                            font-size: 1.1rem;
+                                            font-weight: 600;
+                                            text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+                                        " id="previewCoverPoint2">خطوات سهلة ومبسطة</span>
+                                    </div>
+                                    
+                                    <div style="
+                                        background: rgba(255,255,255,0.15);
+                                        backdrop-filter: blur(10px);
+                                        border-radius: 15px;
+                                        padding: 1rem;
+                                        display: flex;
+                                        align-items: center;
+                                        gap: 1.2rem;
+                                        border: 1px solid rgba(255,255,255,0.2);
+                                        box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+                                    ">
+                                        <div style="
+                                            background: rgba(255,255,255,0.2);
+                                            border-radius: 50%;
+                                            width: 50px;
+                                            height: 50px;
+                                            display: flex;
+                                            align-items: center;
+                                            justify-content: center;
+                                            font-size: 1.5rem;
+                                            flex-shrink: 0;
+                                        ">💻</div>
+                                        <span style="
+                                            font-size: 1.1rem;
+                                            font-weight: 600;
+                                            text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+                                        " id="previewCoverPoint3">التعلم الإلكتروني</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- معلومات إضافية في الأسفل -->
+                            <div style="
+                                margin-top: auto;
+                                text-align: center;
+                                padding: 1.5rem;
+                                background: rgba(0,0,0,0.2);
+                                border-radius: 15px;
+                                backdrop-filter: blur(10px);
+                                border: 1px solid rgba(255,255,255,0.1);
+                            ">
+                                <div style="
+                                    font-size: 0.95rem;
+                                    opacity: 0.9;
+                                    margin-bottom: 0.5rem;
+                                ">إعداد وتصميم</div>
+                                <div style="
+                                    font-size: 1rem;
+                                    font-weight: 600;
+                                    text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+                                ">إدارة عمليات التدريب - وكالة التدريب</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- صفحة المقدمة -->
+                    <div class="page content-page">
+                        <div class="page-number">صفحة 1</div>
+                        <div class="content-wrapper">
+                            <!-- رأس الصفحة مع شعار الجامعة -->
+                            <div style="
+                                display: flex;
+                                align-items: center;
+                                justify-content: space-between;
+                                margin-bottom: 2rem;
+                                padding-bottom: 1.5rem;
+                                border-bottom: 3px solid var(--primary-light);
+                                position: relative;
+                            ">
+                                <div style="
+                                    display: flex;
+                                    align-items: center;
+                                    gap: 1.5rem;
+                                ">
+                                    <div style="
+                                        width: 45px;
+                                        height: 45px;
+                                        background: linear-gradient(135deg, var(--primary-dark), var(--primary-light));
+                                        border-radius: 50%;
+                                        display: flex;
+                                        align-items: center;
+                                        justify-content: center;
+                                        color: white;
+                                        font-size: 1.3rem;
+                                        box-shadow: 0 5px 15px rgba(27, 76, 84, 0.3);
+                                    ">🎓</div>
+                                    <div>
+                                        <h2 style="
+                                            color: var(--primary-dark);
+                                            font-size: 1.3rem;
+                                            font-weight: 700;
+                                            margin: 0 0 0.2rem 0;
+                                        ">مقدمة الدليل</h2>
+                                        <p style="
+                                            color: #666;
+                                            font-size: 0.8rem;
+                                            margin: 0;
+                                            font-weight: 500;
+                                        ">دليل شامل للتسجيل في منصة التعلم الإلكتروني</p>
+                                    </div>
+                                </div>
+                                <div style="
+                                    background: linear-gradient(135deg, var(--accent-red) 0%, #7d1426 100%);
+                                    color: white;
+                                    padding: 0.8rem 1.5rem;
+                                    border-radius: 25px;
+                                    font-size: 0.85rem;
+                                    font-weight: 600;
+                                    box-shadow: 0 4px 15px rgba(158, 27, 50, 0.3);
+                                ">وكالة التدريب</div>
+                                <div style="
+                                    position: absolute;
+                                    bottom: -3px;
+                                    left: 0;
+                                    width: 80px;
+                                    height: 3px;
+                                    background: linear-gradient(90deg, var(--primary-light), var(--accent-red));
+                                    border-radius: 2px;
+                                "></div>
+                            </div>
+
+                            <!-- محتوى المقدمة مع تصميم انفوجرافيك -->
+                            <div style="
+                                background: linear-gradient(135deg, rgba(217, 224, 226, 0.1) 0%, rgba(255,255,255,0.8) 100%);
+                                border-radius: 20px;
+                                padding: 2rem;
+                                margin-bottom: 2rem;
+                                border: 2px solid rgba(27, 76, 84, 0.1);
+                                position: relative;
+                                overflow: hidden;
+                            ">
+                                <div style="
+                                    position: absolute;
+                                    top: 0;
+                                    left: 0;
+                                    width: 100%;
+                                    height: 4px;
+                                    background: linear-gradient(90deg, var(--primary-light), var(--accent-red));
+                                "></div>
+                                <div class="content-text" id="previewIntro" style="
+                                    font-size: 1rem;
+                                    line-height: 1.6;
+                                    color: #2d3748;
+                                    text-align: justify;
+                                    margin: 0;
+                                ">
+                                    مرحباً بك في دليل التسجيل الشامل لمنصة إدارة التعلم الإلكتروني (LMS). هذا الدليل المصور سيساعدك على فهم جميع خطوات التسجيل والبدء في استخدام المنصة بسهولة ويسر.
+                                </div>
+                            </div>
+
+                            <!-- انفوجرافيك الميزات الرئيسية -->
+                            <div style="
+                                display: grid;
+                                grid-template-columns: repeat(3, 1fr);
+                                gap: 1.5rem;
+                                margin: 2rem 0;
+                            ">
+                                <div style="
+                                    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                                    color: white;
+                                    padding: 2rem 1.5rem;
+                                    border-radius: 20px;
+                                    text-align: center;
+                                    position: relative;
+                                    overflow: hidden;
+                                    box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+                                    transition: transform 0.3s ease;
+                                ">
+                                    <div style="
+                                        position: absolute;
+                                        top: -30px;
+                                        right: -30px;
+                                        width: 80px;
+                                        height: 80px;
+                                        background: rgba(255,255,255,0.1);
+                                        border-radius: 50%;
+                                    "></div>
+                                    <div style="
+                                        font-size: 2rem;
+                                        margin-bottom: 0.8rem;
+                                        position: relative;
+                                        z-index: 2;
+                                    ">📝</div>
+                                    <h3 style="
+                                        font-size: 0.9rem;
+                                        font-weight: 700;
+                                        margin: 0 0 0.3rem 0;
+                                        position: relative;
+                                        z-index: 2;
+                                    ">تسجيل سهل</h3>
+                                    <p style="
+                                        font-size: 0.75rem;
+                                        opacity: 0.9;
+                                        margin: 0;
+                                        position: relative;
+                                        z-index: 2;
+                                    ">خطوات بسيطة وواضحة</p>
+                                </div>
+
+                                <div style="
+                                    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+                                    color: white;
+                                    padding: 2rem 1.5rem;
+                                    border-radius: 20px;
+                                    text-align: center;
+                                    position: relative;
+                                    overflow: hidden;
+                                    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+                                    transition: transform 0.3s ease;
+                                ">
+                                    <div style="
+                                        position: absolute;
+                                        top: -30px;
+                                        right: -30px;
+                                        width: 80px;
+                                        height: 80px;
+                                        background: rgba(255,255,255,0.1);
+                                        border-radius: 50%;
+                                    "></div>
+                                    <div style="
+                                        font-size: 2rem;
+                                        margin-bottom: 0.8rem;
+                                        position: relative;
+                                        z-index: 2;
+                                    ">📚</div>
+                                    <h3 style="
+                                        font-size: 0.95rem;
+                                        font-weight: 700;
+                                        margin: 0 0 0.3rem 0;
+                                        position: relative;
+                                        z-index: 2;
+                                    ">تعلم إلكتروني</h3>
+                                    <p style="
+                                        font-size: 0.8rem;
+                                        opacity: 0.9;
+                                        margin: 0;
+                                        position: relative;
+                                        z-index: 2;
+                                    ">منصة متطورة وحديثة</p>
+                                </div>
+
+                                <div style="
+                                    background: linear-gradient(135deg, var(--accent-red) 0%, #7d1426 100%);
+                                    color: white;
+                                    padding: 2rem 1.5rem;
+                                    border-radius: 20px;
+                                    text-align: center;
+                                    position: relative;
+                                    overflow: hidden;
+                                    box-shadow: 0 8px 25px rgba(158, 27, 50, 0.3);
+                                    transition: transform 0.3s ease;
+                                ">
+                                    <div style="
+                                        position: absolute;
+                                        top: -30px;
+                                        right: -30px;
+                                        width: 80px;
+                                        height: 80px;
+                                        background: rgba(255,255,255,0.1);
+                                        border-radius: 50%;
+                                    "></div>
+                                    <div style="
+                                        font-size: 2rem;
+                                        margin-bottom: 0.8rem;
+                                        position: relative;
+                                        z-index: 2;
+                                    ">🎯</div>
+                                    <h3 style="
+                                        font-size: 0.95rem;
+                                        font-weight: 700;
+                                        margin: 0 0 0.3rem 0;
+                                        position: relative;
+                                        z-index: 2;
+                                    ">خطوات واضحة</h3>
+                                    <p style="
+                                        font-size: 0.8rem;
+                                        opacity: 0.9;
+                                        margin: 0;
+                                        position: relative;
+                                        z-index: 2;
+                                    ">دليل شامل ومفصل</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- صفحة المحتوى الرئيسي -->
+                    <div class="page content-page">
+                        <div class="page-number">صفحة 2</div>
+                        <div class="content-wrapper">
+                            <!-- رأس الصفحة مع شعار الجامعة -->
+                            <div style="
+                                display: flex;
+                                align-items: center;
+                                justify-content: space-between;
+                                margin-bottom: 2rem;
+                                padding-bottom: 1.5rem;
+                                border-bottom: 3px solid var(--accent-red);
+                                position: relative;
+                            ">
+                                <div style="
+                                    display: flex;
+                                    align-items: center;
+                                    gap: 1.5rem;
+                                ">
+                                    <div style="
+                                        width: 60px;
+                                        height: 60px;
+                                        background: linear-gradient(135deg, var(--accent-red), #7d1426);
+                                        border-radius: 50%;
+                                        display: flex;
+                                        align-items: center;
+                                        justify-content: center;
+                                        color: white;
+                                        font-size: 1.8rem;
+                                        box-shadow: 0 5px 15px rgba(158, 27, 50, 0.3);
+                                    ">📝</div>
+                                    <div>
+                                        <h2 style="
+                                            color: var(--primary-dark);
+                                            font-size: 1.6rem;
+                                            font-weight: 700;
+                                            margin: 0 0 0.3rem 0;
+                                        ">خطوات التسجيل</h2>
+                                        <p style="
+                                            color: #666;
+                                            font-size: 0.9rem;
+                                            margin: 0;
+                                            font-weight: 500;
+                                        ">دليل مفصل لإنشاء حساب جديد في المنصة</p>
+                                    </div>
+                                </div>
+                                <div style="
+                                    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-light) 100%);
+                                    color: white;
+                                    padding: 0.8rem 1.5rem;
+                                    border-radius: 25px;
+                                    font-size: 0.85rem;
+                                    font-weight: 600;
+                                    box-shadow: 0 4px 15px rgba(27, 76, 84, 0.3);
+                                ">وكالة التدريب</div>
+                                <div style="
+                                    position: absolute;
+                                    bottom: -3px;
+                                    left: 0;
+                                    width: 80px;
+                                    height: 3px;
+                                    background: linear-gradient(90deg, var(--accent-red), var(--primary-light));
+                                    border-radius: 2px;
+                                "></div>
+                            </div>
+
+                            <!-- انفوجرافيك خطوات التسجيل -->
+                            <div style="
+                                display: grid;
+                                grid-template-columns: 1fr;
+                                gap: 1.5rem;
+                                margin-bottom: 2rem;
+                            ">
+                                <!-- الخطوة الأولى -->
+                                <div style="
+                                    display: flex;
+                                    align-items: center;
+                                    gap: 1rem;
+                                    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(255,255,255,0.8) 100%);
+                                    border-radius: 12px;
+                                    padding: 1rem;
+                                    border-left: 4px solid #10b981;
+                                    box-shadow: 0 3px 10px rgba(0,0,0,0.06);
+                                ">
+                                    <div style="
+                                        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                                        color: white;
+                                        width: 40px;
+                                        height: 40px;
+                                        border-radius: 50%;
+                                        display: flex;
+                                        align-items: center;
+                                        justify-content: center;
+                                        font-size: 1.1rem;
+                                        font-weight: bold;
+                                        box-shadow: 0 3px 10px rgba(16, 185, 129, 0.3);
+                                        flex-shrink: 0;
+                                    ">1</div>
+                                    <div style="flex: 1;">
+                                        <h3 style="
+                                            color: var(--primary-dark);
+                                            font-size: 1rem;
+                                            font-weight: 700;
+                                            margin: 0 0 0.3rem 0;
+                                        ">الدخول إلى الموقع الرسمي</h3>
+                                        <p style="
+                                            color: #4a5568;
+                                            font-size: 0.85rem;
+                                            margin: 0;
+                                            line-height: 1.5;
+                                        ">ادخل إلى الموقع الرسمي للجامعة الأمنية وابحث عن رابط منصة LMS</p>
+                                    </div>
+                                </div>
+
+                                <!-- الخطوة الثانية -->
+                                <div style="
+                                    display: flex;
+                                    align-items: center;
+                                    gap: 1rem;
+                                    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(255,255,255,0.8) 100%);
+                                    border-radius: 12px;
+                                    padding: 1rem;
+                                    border-left: 4px solid #3b82f6;
+                                    box-shadow: 0 3px 10px rgba(0,0,0,0.06);
+                                ">
+                                    <div style="
+                                        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+                                        color: white;
+                                        width: 40px;
+                                        height: 40px;
+                                        border-radius: 50%;
+                                        display: flex;
+                                        align-items: center;
+                                        justify-content: center;
+                                        font-size: 1.1rem;
+                                        font-weight: bold;
+                                        box-shadow: 0 3px 10px rgba(59, 130, 246, 0.3);
+                                        flex-shrink: 0;
+                                    ">2</div>
+                                    <div style="flex: 1;">
+                                        <h3 style="
+                                            color: var(--primary-dark);
+                                            font-size: 1rem;
+                                            font-weight: 700;
+                                            margin: 0 0 0.3rem 0;
+                                        ">النقر على "إنشاء حساب جديد"</h3>
+                                        <p style="
+                                            color: #4a5568;
+                                            font-size: 0.85rem;
+                                            margin: 0;
+                                            line-height: 1.5;
+                                        ">ابحث عن زر التسجيل أو إنشاء حساب جديد في الصفحة الرئيسية</p>
+                                    </div>
+                                </div>
+
+                                <!-- الخطوة الثالثة -->
+                                <div style="
+                                    display: flex;
+                                    align-items: center;
+                                    gap: 1rem;
+                                    background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(255,255,255,0.8) 100%);
+                                    border-radius: 12px;
+                                    padding: 1rem;
+                                    border-left: 4px solid #f59e0b;
+                                    box-shadow: 0 3px 10px rgba(0,0,0,0.06);
+                                ">
+                                    <div style="
+                                        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+                                        color: white;
+                                        width: 40px;
+                                        height: 40px;
+                                        border-radius: 50%;
+                                        display: flex;
+                                        align-items: center;
+                                        justify-content: center;
+                                        font-size: 1.1rem;
+                                        font-weight: bold;
+                                        box-shadow: 0 3px 10px rgba(245, 158, 11, 0.3);
+                                        flex-shrink: 0;
+                                    ">3</div>
+                                    <div style="flex: 1;">
+                                        <h3 style="
+                                            color: var(--primary-dark);
+                                            font-size: 1rem;
+                                            font-weight: 700;
+                                            margin: 0 0 0.3rem 0;
+                                        ">ملء البيانات الشخصية المطلوبة</h3>
+                                        <p style="
+                                            color: #4a5568;
+                                            font-size: 0.85rem;
+                                            margin: 0;
+                                            line-height: 1.5;
+                                        ">أدخل جميع المعلومات المطلوبة بدقة وتأكد من صحتها</p>
+                                    </div>
+                                </div>
+
+                                <!-- الخطوة الرابعة -->
+                                <div style="
+                                    display: flex;
+                                    align-items: center;
+                                    gap: 1rem;
+                                    background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(255,255,255,0.8) 100%);
+                                    border-radius: 12px;
+                                    padding: 1rem;
+                                    border-left: 4px solid #8b5cf6;
+                                    box-shadow: 0 3px 10px rgba(0,0,0,0.06);
+                                ">
+                                    <div style="
+                                        background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+                                        color: white;
+                                        width: 40px;
+                                        height: 40px;
+                                        border-radius: 50%;
+                                        display: flex;
+                                        align-items: center;
+                                        justify-content: center;
+                                        font-size: 1.1rem;
+                                        font-weight: bold;
+                                        box-shadow: 0 3px 10px rgba(139, 92, 246, 0.3);
+                                        flex-shrink: 0;
+                                    ">4</div>
+                                    <div style="flex: 1;">
+                                        <h3 style="
+                                            color: var(--primary-dark);
+                                            font-size: 1rem;
+                                            font-weight: 700;
+                                            margin: 0 0 0.3rem 0;
+                                        ">التحقق من البريد الإلكتروني</h3>
+                                        <p style="
+                                            color: #4a5568;
+                                            font-size: 0.85rem;
+                                            margin: 0;
+                                            line-height: 1.5;
+                                        ">تحقق من بريدك الإلكتروني واضغط على رابط التفعيل</p>
+                                    </div>
+                                </div>
+
+                                <!-- الخطوة الخامسة -->
+                                <div style="
+                                    display: flex;
+                                    align-items: center;
+                                    gap: 1rem;
+                                    background: linear-gradient(135deg, rgba(158, 27, 50, 0.1) 0%, rgba(255,255,255,0.8) 100%);
+                                    border-radius: 12px;
+                                    padding: 1rem;
+                                    border-left: 4px solid var(--accent-red);
+                                    box-shadow: 0 3px 10px rgba(0,0,0,0.06);
+                                ">
+                                    <div style="
+                                        background: linear-gradient(135deg, var(--accent-red) 0%, #7d1426 100%);
+                                        color: white;
+                                        width: 40px;
+                                        height: 40px;
+                                        border-radius: 50%;
+                                        display: flex;
+                                        align-items: center;
+                                        justify-content: center;
+                                        font-size: 1.1rem;
+                                        font-weight: bold;
+                                        box-shadow: 0 3px 10px rgba(158, 27, 50, 0.3);
+                                        flex-shrink: 0;
+                                    ">5</div>
+                                    <div style="flex: 1;">
+                                        <h3 style="
+                                            color: var(--primary-dark);
+                                            font-size: 1rem;
+                                            font-weight: 700;
+                                            margin: 0 0 0.3rem 0;
+                                        ">تفعيل الحساب</h3>
+                                        <p style="
+                                            color: #4a5568;
+                                            font-size: 0.85rem;
+                                            margin: 0;
+                                            line-height: 1.5;
+                                        ">أكمل عملية التفعيل وابدأ في استخدام المنصة</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- قسم المتطلبات -->
+                            <div style="
+                                background: linear-gradient(135deg, rgba(27, 76, 84, 0.05) 0%, rgba(255,255,255,0.9) 100%);
+                                border-radius: 15px;
+                                padding: 1.5rem;
+                                border: 2px solid rgba(27, 76, 84, 0.1);
+                                position: relative;
+                                overflow: hidden;
+                            ">
+                                <div style="
+                                    position: absolute;
+                                    top: 0;
+                                    right: 0;
+                                    width: 100%;
+                                    height: 3px;
+                                    background: linear-gradient(90deg, var(--accent-red), var(--primary-light));
+                                "></div>
+                                <h3 style="
+                                    color: var(--primary-dark);
+                                    font-size: 1.1rem;
+                                    font-weight: 700;
+                                    margin: 0 0 1rem 0;
+                                    display: flex;
+                                    align-items: center;
+                                    gap: 0.8rem;
+                                ">
+                                    <span style="
+                                        background: linear-gradient(135deg, var(--primary-light), var(--primary-dark));
+                                        color: white;
+                                        padding: 0.6rem;
+                                        border-radius: 50%;
+                                        font-size: 1rem;
+                                    ">📋</span>
+                                    ما ستحتاجه للتسجيل
+                                </h3>
+                                <div style="
+                                    display: grid;
+                                    grid-template-columns: 1fr;
+                                    gap: 0.8rem;
+                                ">
+                                    <div style="
+                                        display: flex;
+                                        align-items: center;
+                                        gap: 0.8rem;
+                                        padding: 0.8rem;
+                                        background: rgba(16, 185, 129, 0.1);
+                                        border-radius: 8px;
+                                        border: 1px solid rgba(16, 185, 129, 0.2);
+                                    ">
+                                        <div style="
+                                            background: #10b981;
+                                            color: white;
+                                            width: 30px;
+                                            height: 30px;
+                                            border-radius: 50%;
+                                            display: flex;
+                                            align-items: center;
+                                            justify-content: center;
+                                            font-size: 0.9rem;
+                                            flex-shrink: 0;
+                                        ">✅</div>
+                                        <span style="
+                                            color: #2d3748;
+                                            font-weight: 600;
+                                            font-size: 0.85rem;
+                                        ">بريد إلكتروني صالح ونشط</span>
+                                    </div>
+                                    <div style="
+                                        display: flex;
+                                        align-items: center;
+                                        gap: 0.8rem;
+                                        padding: 0.8rem;
+                                        background: rgba(16, 185, 129, 0.1);
+                                        border-radius: 8px;
+                                        border: 1px solid rgba(16, 185, 129, 0.2);
+                                    ">
+                                        <div style="
+                                            background: #10b981;
+                                            color: white;
+                                            width: 30px;
+                                            height: 30px;
+                                            border-radius: 50%;
+                                            display: flex;
+                                            align-items: center;
+                                            justify-content: center;
+                                            font-size: 0.9rem;
+                                            flex-shrink: 0;
+                                        ">✅</div>
+                                        <span style="
+                                            color: #2d3748;
+                                            font-weight: 600;
+                                            font-size: 0.85rem;
+                                        ">رقم هاتف محمول للتحقق</span>
+                                    </div>
+                                    <div style="
+                                        display: flex;
+                                        align-items: center;
+                                        gap: 0.8rem;
+                                        padding: 0.8rem;
+                                        background: rgba(16, 185, 129, 0.1);
+                                        border-radius: 8px;
+                                        border: 1px solid rgba(16, 185, 129, 0.2);
+                                    ">
+                                        <div style="
+                                            background: #10b981;
+                                            color: white;
+                                            width: 30px;
+                                            height: 30px;
+                                            border-radius: 50%;
+                                            display: flex;
+                                            align-items: center;
+                                            justify-content: center;
+                                            font-size: 0.9rem;
+                                            flex-shrink: 0;
+                                        ">✅</div>
+                                        <span style="
+                                            color: #2d3748;
+                                            font-weight: 600;
+                                            font-size: 0.85rem;
+                                        ">معلومات شخصية أساسية</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- صفحات الصور الديناميكية -->
+                    <div id="dynamicImagePages">
+                        <!-- سيتم إنشاء صفحات الصور هنا ديناميكياً -->
+                    </div>
+
+                    <!-- صفحة الخاتمة والتواصل -->
+                    <div class="page content-page">
+                        <div class="page-number" id="conclusionPageNumber">صفحة 3</div>
+                        <div class="content-wrapper" style="height: 100%; display: flex; flex-direction: column;">
+                            <!-- رأس الصفحة -->
+                            <div style="
+                                display: flex;
+                                align-items: center;
+                                justify-content: space-between;
+                                margin-bottom: 1.5rem;
+                                padding-bottom: 1rem;
+                                border-bottom: 3px solid #10b981;
+                                position: relative;
+                                flex-shrink: 0;
+                            ">
+                                <div style="
+                                    display: flex;
+                                    align-items: center;
+                                    gap: 1rem;
+                                ">
+                                    <div style="
+                                        width: 50px;
+                                        height: 50px;
+                                        background: linear-gradient(135deg, #10b981, #059669);
+                                        border-radius: 50%;
+                                        display: flex;
+                                        align-items: center;
+                                        justify-content: center;
+                                        color: white;
+                                        font-size: 1.5rem;
+                                        box-shadow: 0 5px 15px rgba(16, 185, 129, 0.3);
+                                    ">🎯</div>
+                                    <div>
+                                        <h2 style="
+                                            color: var(--primary-dark);
+                                            font-size: 1.3rem;
+                                            font-weight: 700;
+                                            margin: 0 0 0.2rem 0;
+                                        ">خاتمة ومعلومات التواصل</h2>
+                                        <p style="
+                                            color: #666;
+                                            font-size: 0.8rem;
+                                            margin: 0;
+                                            font-weight: 500;
+                                        ">تهانينا على إكمال الدليل - معلومات الدعم والمساعدة</p>
+                                    </div>
+                                </div>
+                                <div style="
+                                    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-light) 100%);
+                                    color: white;
+                                    padding: 0.6rem 1.2rem;
+                                    border-radius: 20px;
+                                    font-size: 0.8rem;
+                                    font-weight: 600;
+                                    box-shadow: 0 4px 15px rgba(27, 76, 84, 0.3);
+                                ">وكالة التدريب</div>
+                                <div style="
+                                    position: absolute;
+                                    bottom: -3px;
+                                    left: 0;
+                                    width: 80px;
+                                    height: 3px;
+                                    background: linear-gradient(90deg, #10b981, var(--primary-light));
+                                    border-radius: 2px;
+                                "></div>
+                            </div>
+
+                            <!-- المحتوى الرئيسي -->
+                            <div style="flex: 1; display: flex; flex-direction: column; gap: 1.5rem; overflow: hidden;">
+                                <!-- رسالة التهنئة -->
+                                <div style="
+                                    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(255,255,255,0.9) 100%);
+                                    border-radius: 15px;
+                                    padding: 1.8rem;
+                                    border: 2px solid rgba(16, 185, 129, 0.2);
+                                    position: relative;
+                                    overflow: hidden;
+                                    text-align: center;
+                                    flex-shrink: 0;
+                                ">
+                                    <div style="
+                                        position: absolute;
+                                        top: 0;
+                                        left: 0;
+                                        right: 0;
+                                        height: 4px;
+                                        background: linear-gradient(90deg, #10b981, var(--accent-red));
+                                    "></div>
+                                    
+                                    <div style="
+                                        width: 60px;
+                                        height: 60px;
+                                        background: linear-gradient(135deg, #10b981, #059669);
+                                        border-radius: 50%;
+                                        display: flex;
+                                        align-items: center;
+                                        justify-content: center;
+                                        font-size: 2rem;
+                                        color: white;
+                                        margin: 0 auto 1rem auto;
+                                        box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+                                    ">🎉</div>
+                                    
+                                    <h3 style="
+                                        color: var(--primary-dark);
+                                        font-size: 1.2rem;
+                                        font-weight: 700;
+                                        margin: 0 0 0.8rem 0;
+                                    ">تهانينا! تم إكمال الدليل بنجاح</h3>
+                                    
+                                    <div class="content-text" id="previewConclusion" style="
+                                        font-size: 0.95rem;
+                                        line-height: 1.6;
+                                        color: #2d3748;
+                                        margin: 0;
+                                        text-align: center;
+                                    ">
+                                        تهانينا! لقد أكملت جميع خطوات التسجيل في منصة LMS بنجاح. الآن يمكنك البدء في استكشاف المحتوى التعليمي والاستفادة من جميع الميزات المتاحة.
+                                    </div>
+                                </div>
+
+                                <!-- معلومات التواصل -->
+                                <div style="
+                                    background: linear-gradient(135deg, rgba(27, 76, 84, 0.05) 0%, rgba(255,255,255,0.9) 100%);
+                                    border-radius: 15px;
+                                    padding: 1.8rem;
+                                    border: 2px solid rgba(27, 76, 84, 0.1);
+                                    position: relative;
+                                    overflow: hidden;
+                                    flex: 1;
+                                    min-height: 0;
+                                ">
+                                    <div style="
+                                        position: absolute;
+                                        top: 0;
+                                        left: 0;
+                                        right: 0;
+                                        height: 4px;
+                                        background: linear-gradient(90deg, var(--primary-light), var(--accent-red));
+                                    "></div>
+                                    
+                                    <div style="
+                                        display: flex;
+                                        align-items: center;
+                                        gap: 1rem;
+                                        margin-bottom: 1.5rem;
+                                    ">
+                                        <div style="
+                                            width: 50px;
+                                            height: 50px;
+                                            background: linear-gradient(135deg, var(--primary-dark), var(--primary-light));
+                                            border-radius: 50%;
+                                            display: flex;
+                                            align-items: center;
+                                            justify-content: center;
+                                            color: white;
+                                            font-size: 1.5rem;
+                                            box-shadow: 0 5px 15px rgba(27, 76, 84, 0.3);
+                                        ">📞</div>
+                                        <div>
+                                            <h3 style="
+                                                color: var(--primary-dark);
+                                                font-size: 1.2rem;
+                                                font-weight: 700;
+                                                margin: 0 0 0.2rem 0;
+                                            ">معلومات التواصل والدعم</h3>
+                                            <p style="
+                                                color: #666;
+                                                font-size: 0.8rem;
+                                                margin: 0;
+                                                font-weight: 500;
+                                            ">للمساعدة والاستفسارات حول منصة التعلم الإلكتروني</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div style="
+                                        display: grid; 
+                                        grid-template-columns: repeat(2, 1fr); 
+                                        gap: 0.8rem;
+                                        height: calc(100% - 80px);
+                                        overflow: hidden;
+                                    " id="contactInfoDisplay">
+                                        <div style="
+                                            display: flex; 
+                                            align-items: center; 
+                                            gap: 0.6rem;
+                                            background: rgba(255,255,255,0.7);
+                                            padding: 0.6rem;
+                                            border-radius: 8px;
+                                            border: 1px solid rgba(27, 76, 84, 0.1);
+                                            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+                                        ">
+                                            <div style="
+                                                background: #3b82f6;
+                                                color: white;
+                                                width: 28px;
+                                                height: 28px;
+                                                border-radius: 50%;
+                                                display: flex;
+                                                align-items: center;
+                                                justify-content: center;
+                                                font-size: 0.8rem;
+                                                flex-shrink: 0;
+                                            ">📧</div>
+                                            <div style="min-width: 0; flex: 1;">
+                                                <div style="font-size: 0.65rem; color: #666; font-weight: 600; margin-bottom: 0.1rem;">البريد الإلكتروني</div>
+                                                <span style="font-weight: 600; color: #2d3748; font-size: 0.7rem; word-break: break-all;" id="displayEmail">info@psu.edu.sa</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div style="
+                                            display: flex; 
+                                            align-items: center; 
+                                            gap: 0.6rem;
+                                            background: rgba(255,255,255,0.7);
+                                            padding: 0.6rem;
+                                            border-radius: 8px;
+                                            border: 1px solid rgba(27, 76, 84, 0.1);
+                                            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+                                        ">
+                                            <div style="
+                                                background: #10b981;
+                                                color: white;
+                                                width: 28px;
+                                                height: 28px;
+                                                border-radius: 50%;
+                                                display: flex;
+                                                align-items: center;
+                                                justify-content: center;
+                                                font-size: 0.8rem;
+                                                flex-shrink: 0;
+                                            ">📱</div>
+                                            <div style="min-width: 0; flex: 1;">
+                                                <div style="font-size: 0.65rem; color: #666; font-weight: 600; margin-bottom: 0.1rem;">رقم الهاتف</div>
+                                                <span style="font-weight: 600; color: #2d3748; font-size: 0.7rem;" id="displayPhone">+966 11 123 4567</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div style="
+                                            display: flex; 
+                                            align-items: center; 
+                                            gap: 0.6rem;
+                                            background: rgba(255,255,255,0.7);
+                                            padding: 0.6rem;
+                                            border-radius: 8px;
+                                            border: 1px solid rgba(27, 76, 84, 0.1);
+                                            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+                                        ">
+                                            <div style="
+                                                background: var(--accent-red);
+                                                color: white;
+                                                width: 28px;
+                                                height: 28px;
+                                                border-radius: 50%;
+                                                display: flex;
+                                                align-items: center;
+                                                justify-content: center;
+                                                font-size: 0.8rem;
+                                                flex-shrink: 0;
+                                            ">🌐</div>
+                                            <div style="min-width: 0; flex: 1;">
+                                                <div style="font-size: 0.65rem; color: #666; font-weight: 600; margin-bottom: 0.1rem;">الموقع الإلكتروني</div>
+                                                <span style="font-weight: 600; color: #2d3748; font-size: 0.7rem; word-break: break-all;" id="displayWebsite">www.psu.edu.sa</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div style="
+                                            display: flex; 
+                                            align-items: center; 
+                                            gap: 0.6rem;
+                                            background: rgba(255,255,255,0.7);
+                                            padding: 0.6rem;
+                                            border-radius: 8px;
+                                            border: 1px solid rgba(27, 76, 84, 0.1);
+                                            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+                                        ">
+                                            <div style="
+                                                background: #8b5cf6;
+                                                color: white;
+                                                width: 28px;
+                                                height: 28px;
+                                                border-radius: 50%;
+                                                display: flex;
+                                                align-items: center;
+                                                justify-content: center;
+                                                font-size: 0.8rem;
+                                                flex-shrink: 0;
+                                            ">📍</div>
+                                            <div style="min-width: 0; flex: 1;">
+                                                <div style="font-size: 0.65rem; color: #666; font-weight: 600; margin-bottom: 0.1rem;">العنوان</div>
+                                                <span style="font-weight: 600; color: #2d3748; font-size: 0.7rem;" id="displayAddress">الرياض، المملكة العربية السعودية</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div style="
+                                            display: flex; 
+                                            align-items: center; 
+                                            gap: 0.6rem;
+                                            background: rgba(255,255,255,0.7);
+                                            padding: 0.6rem;
+                                            border-radius: 8px;
+                                            border: 1px solid rgba(27, 76, 84, 0.1);
+                                            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+                                        ">
+                                            <div style="
+                                                background: #f59e0b;
+                                                color: white;
+                                                width: 28px;
+                                                height: 28px;
+                                                border-radius: 50%;
+                                                display: flex;
+                                                align-items: center;
+                                                justify-content: center;
+                                                font-size: 0.8rem;
+                                                flex-shrink: 0;
+                                            ">👨‍🏫</div>
+                                            <div style="min-width: 0; flex: 1;">
+                                                <div style="font-size: 0.65rem; color: #666; font-weight: 600; margin-bottom: 0.1rem;">المشرف</div>
+                                                <span style="font-weight: 600; color: #2d3748; font-size: 0.7rem;" id="displaySupervisor">د. أحمد محمد العلي</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div style="
+                                            display: flex; 
+                                            align-items: center; 
+                                            gap: 0.6rem;
+                                            background: rgba(255,255,255,0.7);
+                                            padding: 0.6rem;
+                                            border-radius: 8px;
+                                            border: 1px solid rgba(27, 76, 84, 0.1);
+                                            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+                                        ">
+                                            <div style="
+                                                background: #06b6d4;
+                                                color: white;
+                                                width: 28px;
+                                                height: 28px;
+                                                border-radius: 50%;
+                                                display: flex;
+                                                align-items: center;
+                                                justify-content: center;
+                                                font-size: 0.8rem;
+                                                flex-shrink: 0;
+                                            ">📞</div>
+                                            <div style="min-width: 0; flex: 1;">
+                                                <div style="font-size: 0.65rem; color: #666; font-weight: 600; margin-bottom: 0.1rem;">جوال المشرف</div>
+                                                <span style="font-weight: 600; color: #2d3748; font-size: 0.7rem;" id="displaySupervisorPhone">+966 50 123 4567</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- زر المساعدة العائم -->
+    <div class="floating-help" onclick="showHelp()" title="مساعدة ودليل الاستخدام">❓</div>
+
+    <!-- Modal للتحميل -->
+    <div class="modal" id="downloadModal">
+        <div class="modal-content">
+            <h3>🔄 جاري إنشاء ملف PDF</h3>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <p id="progressText">يرجى الانتظار... جاري معالجة الصفحات</p>
+        </div>
+    </div>
+
+    <!-- Modal المساعدة -->
+    <div class="modal" id="helpModal">
+        <div class="modal-content">
+            <h3>📖 دليل الاستخدام</h3>
+            <div style="text-align: right; line-height: 1.8; font-size: 0.95rem;">
+                <p><strong style="color: var(--primary-dark);">1. اختيار القالب:</strong> اختر من 5 قوالب رسمية للجامعة الأمنية</p>
+                <p><strong style="color: var(--primary-dark);">2. رفع الصور:</strong> ارفع شعار الجامعة والصور التوضيحية</p>
+                <p><strong style="color: var(--primary-dark);">3. كتابة المحتوى:</strong> أدخل النصوص في الحقول المخصصة</p>
+                <p><strong style="color: var(--primary-dark);">4. اختيار الألوان:</strong> استخدم ألوان هوية الجامعة</p>
+                <p><strong style="color: var(--primary-dark);">5. المعاينة:</strong> راجع التصميم قبل التحميل</p>
+                <p><strong style="color: var(--primary-dark);">6. التحميل:</strong> احصل على PDF عالي الجودة</p>
+            </div>
+            <button class="btn btn-primary" onclick="closeHelp()" style="margin-top: 1.5rem;">فهمت، شكراً! 👍</button>
+        </div>
+    </div>
+
+    <!-- Modal تعديل بيانات الصورة -->
+    <div class="modal" id="editImageModal">
+        <div class="modal-content">
+            <h3>✏️ تعديل بيانات الصورة</h3>
+            <div class="input-group">
+                <label>عنوان الصورة</label>
+                <input type="text" id="imageTitle" placeholder="أدخل عنوان الصورة">
+            </div>
+            <div class="input-group">
+                <label>وصف الصورة</label>
+                <textarea id="imageDescription" placeholder="أدخل وصف تفصيلي للصورة" rows="3"></textarea>
+            </div>
+            <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 1.5rem;">
+                <button class="btn btn-primary" onclick="saveImageData()">💾 حفظ</button>
+                <button class="btn btn-secondary" onclick="closeEditImageModal()">❌ إلغاء</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentTemplate = 1;
+        let currentColor = '#1B4C54';
+        let uploadedImages = [];
+        let uploadedLogo = null;
+        let currentFontStyle = 'cairo';
+        let currentEditingImageIndex = -1;
+
+        // وظيفة تبديل الأقسام
+        function toggleSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            const toggleIcon = section.querySelector('.toggle-icon');
+            
+            if (section.classList.contains('expanded')) {
+                section.classList.remove('expanded');
+                toggleIcon.textContent = '+';
+            } else {
+                section.classList.add('expanded');
+                toggleIcon.textContent = '×';
+            }
+        }
+
+        // تحديث المعاينة عند تغيير النصوص
+        document.getElementById('bookletTitle').addEventListener('input', function() {
+            document.getElementById('previewTitle').textContent = this.value;
+            updateWordCount();
+        });
+
+        document.getElementById('bookletSubtitle').addEventListener('input', function() {
+            document.getElementById('previewSubtitle').textContent = this.value;
+            updateWordCount();
+        });
+
+        document.getElementById('coverPoint1').addEventListener('input', function() {
+            document.getElementById('previewCoverPoint1').textContent = this.value;
+            updateWordCount();
+        });
+
+        document.getElementById('coverPoint2').addEventListener('input', function() {
+            document.getElementById('previewCoverPoint2').textContent = this.value;
+            updateWordCount();
+        });
+
+        document.getElementById('coverPoint3').addEventListener('input', function() {
+            document.getElementById('previewCoverPoint3').textContent = this.value;
+            updateWordCount();
+        });
+
+        document.getElementById('introText').addEventListener('input', function() {
+            document.getElementById('previewIntro').textContent = this.value;
+            updateWordCount();
+        });
+
+        document.getElementById('mainContent').addEventListener('input', function() {
+            document.getElementById('previewMainContent').innerHTML = this.value.replace(/\n/g, '<br>');
+            updateWordCount();
+        });
+
+        document.getElementById('conclusionText').addEventListener('input', function() {
+            document.getElementById('previewConclusion').textContent = this.value;
+            updateWordCount();
+        });
+
+        // تحديث معلومات التواصل
+        ['contactEmail', 'contactPhone', 'contactWebsite', 'contactAddress', 'supervisorName', 'supervisorPhone'].forEach(id => {
+            document.getElementById(id).addEventListener('input', function() {
+                const displayId = id.replace('contact', 'display').replace('supervisor', 'displaySupervisor');
+                const displayElement = document.getElementById(displayId);
+                if (displayElement) {
+                    displayElement.textContent = this.value;
+                }
+            });
+        });
+
+        // اختيار القوالب
+        document.querySelectorAll('.template-card').forEach(card => {
+            card.addEventListener('click', function() {
+                document.querySelectorAll('.template-card').forEach(c => c.classList.remove('active'));
+                this.classList.add('active');
+                currentTemplate = parseInt(this.dataset.template);
+                applyTemplate(currentTemplate);
+                showSuccessMessage('تم تطبيق القالب بنجاح! 🎨');
+            });
+        });
+
+        // اختيار الألوان
+        document.querySelectorAll('.color-option').forEach(option => {
+            option.addEventListener('click', function() {
+                document.querySelectorAll('.color-option').forEach(o => o.classList.remove('active'));
+                this.classList.add('active');
+                currentColor = this.dataset.color;
+                applyColorScheme(currentColor);
+                showSuccessMessage('تم تطبيق اللون بنجاح! 🌈');
+            });
+        });
+
+        // رفع الشعار
+        document.getElementById('logoUpload').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('⚠️ حجم الشعار كبير جداً! يرجى اختيار صورة أصغر من 5 ميجابايت.');
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    uploadedLogo = {
+                        src: e.target.result,
+                        name: file.name
+                    };
+                    displayUploadedLogo();
+                    setAsLogo(uploadedLogo.src, uploadedLogo.name);
+                    showSuccessMessage(`تم رفع الشعار "${file.name}" بنجاح! 🏛️`);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // رفع صور الخطوات
+        document.getElementById('imagesUpload').addEventListener('change', function(e) {
+            const files = Array.from(e.target.files);
+            files.forEach(file => {
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('⚠️ حجم الصورة كبير جداً! يرجى اختيار صورة أصغر من 5 ميجابايت.');
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    uploadedImages.push({
+                        src: e.target.result,
+                        name: file.name,
+                        title: file.name.replace(/\.[^/.]+$/, ""),
+                        description: "هذه الصورة توضح إحدى خطوات التسجيل في منصة LMS."
+                    });
+                    displayUploadedImages();
+                    updateImageGallery();
+                    updateImageCount();
+                    showSuccessMessage(`تم رفع الصورة "${file.name}" بنجاح! 📷`);
+                };
+                reader.readAsDataURL(file);
+            });
+        });
+
+        function displayUploadedLogo() {
+            const container = document.getElementById('uploadedLogo');
+            container.innerHTML = '';
+            
+            if (uploadedLogo) {
+                const imgContainer = document.createElement('div');
+                imgContainer.style.cssText = 'position: relative; display: inline-block; margin: 0.5rem;';
+                
+                const imgElement = document.createElement('img');
+                imgElement.src = uploadedLogo.src;
+                imgElement.className = 'uploaded-image';
+                imgElement.title = `الشعار الحالي: "${uploadedLogo.name}"`;
+                imgElement.style.border = '3px solid #2ed573';
+                
+                const deleteBtn = document.createElement('button');
+                deleteBtn.innerHTML = '❌';
+                deleteBtn.title = `حذف الشعار "${uploadedLogo.name}"`;
+                deleteBtn.style.cssText = `
+                    position: absolute;
+                    top: -5px;
+                    right: -5px;
+                    background: #ff4757;
+                    color: white;
+                    border: none;
+                    border-radius: 50%;
+                    width: 20px;
+                    height: 20px;
+                    cursor: pointer;
+                    font-size: 0.7rem;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                `;
+                deleteBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    deleteLogo();
+                };
+                
+                imgContainer.appendChild(imgElement);
+                imgContainer.appendChild(deleteBtn);
+                container.appendChild(imgContainer);
+            }
+        }
+
+        function displayUploadedImages() {
+            const container = document.getElementById('uploadedImages');
+            container.innerHTML = '';
+            uploadedImages.forEach((img, index) => {
+                const imgContainer = document.createElement('div');
+                imgContainer.style.cssText = 'position: relative; display: inline-block; margin: 0.5rem;';
+                
+                const imgElement = document.createElement('img');
+                imgElement.src = img.src;
+                imgElement.className = 'uploaded-image';
+                imgElement.title = `انقر لتعيين "${img.name}" كشعار`;
+                imgElement.onclick = () => setAsLogo(img.src, img.name);
+                
+                const deleteBtn = document.createElement('button');
+                deleteBtn.innerHTML = '❌';
+                deleteBtn.title = `حذف الصورة "${img.name}"`;
+                deleteBtn.style.cssText = `
+                    position: absolute;
+                    top: -5px;
+                    right: -5px;
+                    background: #ff4757;
+                    color: white;
+                    border: none;
+                    border-radius: 50%;
+                    width: 20px;
+                    height: 20px;
+                    cursor: pointer;
+                    font-size: 0.7rem;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                `;
+                deleteBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    deleteImage(index);
+                };
+                
+                const editBtn = document.createElement('button');
+                editBtn.innerHTML = '✏️';
+                editBtn.title = `تعديل بيانات الصورة "${img.name}"`;
+                editBtn.style.cssText = `
+                    position: absolute;
+                    top: -5px;
+                    left: -5px;
+                    background: #3742fa;
+                    color: white;
+                    border: none;
+                    border-radius: 50%;
+                    width: 20px;
+                    height: 20px;
+                    cursor: pointer;
+                    font-size: 0.7rem;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                `;
+                editBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    editImageData(index);
+                };
+                
+                imgContainer.appendChild(imgElement);
+                imgContainer.appendChild(deleteBtn);
+                imgContainer.appendChild(editBtn);
+                container.appendChild(imgContainer);
+            });
+        }
+
+        function setAsLogo(src, name) {
+            const logoContainer = document.getElementById('logoContainer');
+            logoContainer.innerHTML = `<img src="${src}" alt="شعار">`;
+            showSuccessMessage(`تم تعيين "${name}" كشعار رئيسي! 🏛️`);
+        }
+
+        function updateImageGallery() {
+            const dynamicPagesContainer = document.getElementById('dynamicImagePages');
+            dynamicPagesContainer.innerHTML = '';
+            
+            if (uploadedImages.length > 0) {
+                uploadedImages.forEach((img, index) => {
+                    const pageDiv = document.createElement('div');
+                    pageDiv.className = 'page content-page';
+                    
+                    // تخطيط عمودي موحد للجميع
+                    const isRightLayout = true;
+                    const flexDirection = 'column';
+                    const textAlign = 'center';
+                    
+                    pageDiv.innerHTML = `
+                        <div class="page-number">صفحة ${index + 3}</div>
+                        <!-- رأس الصفحة -->
+                        <div style="
+                            display: flex;
+                            align-items: center;
+                            justify-content: space-between;
+                            margin-bottom: 2rem;
+                            padding-bottom: 1.5rem;
+                            border-bottom: 3px solid #3b82f6;
+                            position: relative;
+                        ">
+                            <div style="
+                                display: flex;
+                                align-items: center;
+                                gap: 1.5rem;
+                            ">
+                                <div style="
+                                    width: 60px;
+                                    height: 60px;
+                                    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+                                    border-radius: 50%;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                    color: white;
+                                    font-size: 1.8rem;
+                                    box-shadow: 0 5px 15px rgba(59, 130, 246, 0.3);
+                                ">🖼️</div>
+                                <div>
+                                    <h2 style="
+                                        color: var(--primary-dark);
+                                        font-size: 1.6rem;
+                                        font-weight: 700;
+                                        margin: 0 0 0.3rem 0;
+                                    ">${img.title || img.name}</h2>
+                                    <p style="
+                                        color: #666;
+                                        font-size: 0.9rem;
+                                        margin: 0;
+                                        font-weight: 500;
+                                    ">خطوة رقم ${index + 1} من ${uploadedImages.length} - صورة توضيحية</p>
+                                </div>
+                            </div>
+                            <div style="
+                                background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-light) 100%);
+                                color: white;
+                                padding: 0.8rem 1.5rem;
+                                border-radius: 25px;
+                                font-size: 0.85rem;
+                                font-weight: 600;
+                                box-shadow: 0 4px 15px rgba(27, 76, 84, 0.3);
+                            ">وكالة التدريب</div>
+                            <div style="
+                                position: absolute;
+                                bottom: -3px;
+                                left: 0;
+                                width: 80px;
+                                height: 3px;
+                                background: linear-gradient(90deg, #3b82f6, var(--primary-light));
+                                border-radius: 2px;
+                            "></div>
+                        </div>
+                        
+                        <div class="image-layout" style="
+                            display: flex;
+                            flex-direction: column;
+                            align-items: center;
+                            gap: 2rem;
+                            margin: 2rem 0;
+                        ">
+                            <!-- حاوية الصورة في الأعلى -->
+                            <div class="image-container" style="
+                                width: 100%;
+                                max-width: 600px;
+                                display: flex;
+                                justify-content: center;
+                                align-items: center;
+                            ">
+                                <div style="
+                                    background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,250,252,0.95) 100%);
+                                    border-radius: 20px;
+                                    padding: 2rem;
+                                    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+                                    border: 2px solid rgba(59, 130, 246, 0.2);
+                                    transition: all 0.3s ease;
+                                    width: 100%;
+                                    position: relative;
+                                    overflow: hidden;
+                                ">
+                                    <div style="
+                                        position: absolute;
+                                        top: 0;
+                                        left: 0;
+                                        right: 0;
+                                        height: 5px;
+                                        background: linear-gradient(90deg, #3b82f6, var(--accent-red));
+                                    "></div>
+                                    
+                                    <!-- إطار الصورة -->
+                                    <div style="
+                                        background: white;
+                                        border-radius: 15px;
+                                        padding: 1rem;
+                                        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+                                        border: 1px solid rgba(0,0,0,0.05);
+                                        margin-bottom: 1.5rem;
+                                    ">
+                                        <img src="${img.src}" alt="${img.title || img.name}" style="
+                                            width: 100%;
+                                            height: auto;
+                                            max-height: 400px;
+                                            border-radius: 10px;
+                                            display: block;
+                                            object-fit: contain;
+                                        ">
+                                    </div>
+                                    
+                                    <!-- تسمية الصورة -->
+                                    <div style="
+                                        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+                                        border-radius: 12px;
+                                        padding: 1.2rem;
+                                        color: white;
+                                        text-align: center;
+                                        position: relative;
+                                        overflow: hidden;
+                                    ">
+                                        <div style="
+                                            position: absolute;
+                                            top: -50%;
+                                            right: -20%;
+                                            width: 100px;
+                                            height: 100px;
+                                            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+                                            border-radius: 50%;
+                                        "></div>
+                                        <div style="
+                                            display: flex;
+                                            align-items: center;
+                                            justify-content: center;
+                                            gap: 0.8rem;
+                                            position: relative;
+                                            z-index: 2;
+                                        ">
+                                            <span style="font-size: 1.3rem;">📷</span>
+                                            <span style="font-weight: 600; font-size: 1rem;">${img.title || img.name}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- حاوية الوصف في الأسفل -->
+                            <div class="description-container" style="
+                                width: 100%;
+                                max-width: 800px;
+                                display: flex;
+                                flex-direction: column;
+                                justify-content: center;
+                            ">
+                                <div style="
+                                    background: linear-gradient(135deg, rgba(27, 76, 84, 0.05) 0%, rgba(255,255,255,0.95) 100%);
+                                    border-radius: 20px;
+                                    padding: 1.8rem;
+                                    border: 2px solid rgba(27, 76, 84, 0.1);
+                                    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+                                    position: relative;
+                                    overflow: hidden;
+                                    display: flex;
+                                    flex-direction: column;
+                                    min-height: 200px;
+                                ">
+                                    <div style="
+                                        position: absolute;
+                                        top: 0;
+                                        left: 0;
+                                        right: 0;
+                                        height: 4px;
+                                        background: linear-gradient(90deg, var(--primary-light), var(--accent-red));
+                                    "></div>
+                                    
+
+                                    
+                                    <!-- النص الوصفي -->
+                                    <div style="
+                                        background: rgba(255, 255, 255, 0.8);
+                                        border-radius: 15px;
+                                        padding: 2rem;
+                                        border: 1px solid rgba(27, 76, 84, 0.1);
+                                        box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+                                        flex: 1;
+                                    ">
+                                        <p style="
+                                            color: #2d3748;
+                                            line-height: 1.6;
+                                            font-size: 1rem;
+                                            margin: 0;
+                                            font-weight: 500;
+                                            text-align: justify;
+                                            word-wrap: break-word;
+                                            overflow-wrap: break-word;
+                                        ">
+                                            ${img.description || "هذه الصورة توضح إحدى خطوات التسجيل في منصة LMS بشكل مفصل وواضح، مما يساعد المستخدمين على فهم العملية بسهولة ويسر."}
+                                        </p>
+                                    </div>
+                                    
+
+                                </div>
+                            </div>
+                        </div>
+
+                    `;
+                    dynamicPagesContainer.appendChild(pageDiv);
+                });
+            }
+            
+            updatePageCount();
+        }
+
+        function deleteImage(index) {
+            if (index >= 0 && index < uploadedImages.length) {
+                if (confirm(`هل أنت متأكد من حذف الصورة "${uploadedImages[index].name}"؟`)) {
+                    const deletedImage = uploadedImages[index];
+                    uploadedImages.splice(index, 1);
+                    displayUploadedImages();
+                    updateImageGallery();
+                    updateImageCount();
+                    showSuccessMessage(`تم حذف الصورة "${deletedImage.name}" بنجاح! 🗑️`);
+                }
+            }
+        }
+
+        function editImageData(index) {
+            currentEditingImageIndex = index;
+            const img = uploadedImages[index];
+            
+            document.getElementById('imageTitle').value = img.title || img.name;
+            document.getElementById('imageDescription').value = img.description || '';
+            document.getElementById('editImageModal').style.display = 'flex';
+        }
+
+        function saveImageData() {
+            if (currentEditingImageIndex >= 0) {
+                const title = document.getElementById('imageTitle').value.trim();
+                const description = document.getElementById('imageDescription').value.trim();
+                
+                if (!title) {
+                    alert('⚠️ يرجى إدخال عنوان للصورة');
+                    return;
+                }
+                
+                uploadedImages[currentEditingImageIndex].title = title;
+                uploadedImages[currentEditingImageIndex].description = description || "هذه الصورة توضح إحدى خطوات التسجيل في منصة LMS.";
+                
+                displayUploadedImages();
+                updateImageGallery();
+                closeEditImageModal();
+                showSuccessMessage(`تم تحديث بيانات الصورة بنجاح! ✏️`);
+            }
+        }
+
+        function closeEditImageModal() {
+            document.getElementById('editImageModal').style.display = 'none';
+            currentEditingImageIndex = -1;
+        }
+
+        function deleteLogo() {
+            if (confirm(`هل أنت متأكد من حذف الشعار "${uploadedLogo.name}"؟`)) {
+                const deletedLogo = uploadedLogo.name;
+                uploadedLogo = null;
+                displayUploadedLogo();
+                
+                const logoContainer = document.getElementById('logoContainer');
+                logoContainer.innerHTML = '🎓';
+                
+                showSuccessMessage(`تم حذف الشعار "${deletedLogo}" بنجاح! 🗑️`);
+            }
+        }
+
+        function updatePageCount() {
+            const basePages = 3;
+            const imagePages = uploadedImages.length;
+            const totalPages = basePages + imagePages;
+            
+            document.getElementById('pageCount').textContent = totalPages;
+            
+            const conclusionPageElement = document.getElementById('conclusionPageNumber');
+            if (conclusionPageElement) {
+                conclusionPageElement.textContent = `صفحة ${basePages + imagePages}`;
+            }
+        }
+
+        function updateImageCount() {
+            document.getElementById('imageCount').textContent = uploadedImages.length;
+        }
+
+        function updateWordCount() {
+            const texts = [
+                document.getElementById('bookletTitle').value,
+                document.getElementById('bookletSubtitle').value,
+                document.getElementById('coverPoint1').value,
+                document.getElementById('coverPoint2').value,
+                document.getElementById('coverPoint3').value,
+                document.getElementById('introText').value,
+                document.getElementById('mainContent').value,
+                document.getElementById('conclusionText').value
+            ];
+            
+            const totalWords = texts.join(' ').split(/\s+/).filter(word => word.length > 0).length;
+            document.getElementById('wordCount').textContent = totalWords;
+        }
+
+        function applyTemplate(templateId) {
+            const coverPage = document.getElementById('coverPage');
+            
+            // إزالة جميع فئات القوالب السابقة
+            coverPage.className = 'page cover-page';
+            
+            // إضافة فئة القالب الجديد
+            coverPage.classList.add(`template-${templateId}`);
+        }
+
+        function applyColorScheme(color) {
+            // تطبيق نظام الألوان على العناصر المختلفة
+            const root = document.documentElement;
+            root.style.setProperty('--primary-color', color);
+        }
+
+        function previewBooklet() {
+            updateImageGallery();
+            updatePageCount();
+            updateWordCount();
+            showSuccessMessage('تم تحديث المعاينة بنجاح! 🔄');
+        }
+
+        function printBooklet() {
+            // تحديث المعاينة قبل الطباعة
+            updateImageGallery();
+            updatePageCount();
+            
+            // إظهار رسالة تحضيرية
+            showSuccessMessage('جاري تحضير الكتيب للطباعة... 🖨️');
+            
+            setTimeout(() => {
+                window.print();
+            }, 1000);
+        }
+
+        function generatePDF() {
+
+  const modal = document.getElementById('downloadModal');
+  const progressFill = document.getElementById('progressFill');
+  const progressText = document.getElementById('progressText');
+  const setProgress = (pct, txt) => {
+    if (progressFill) progressFill.style.width = pct + '%';
+    if (progressText && txt) progressText.textContent = txt;
+  };
+
+  if (modal) modal.style.display = 'flex';
+  setProgress(5, 'بدء التحضير للصفحات…');
+
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF('p','mm','a4');
+  const pages = document.querySelectorAll('#bookletPreview .page');
+
+  // إخفاء حدود المعاينة أثناء الالتقاط
+  const savedBorders = [];
+  pages.forEach(p => {
+    savedBorders.push({el:p, border:p.style.border});
+    p.style.border = 'none';
+  });
+
+  try {
+    const pageW = 210, pageH = 297; // A4 mm
+    const pxToMm = px => px * 25.4 / 96;
+
+    for (let i=0; i<pages.length; i++){
+      const page = pages[i];
+      setProgress(Math.max(10, Math.round((i/pages.length)*80)), 'التقاط الصفحة ' + (i+1) + ' من ' + pages.length);
+
+      const canvas = await html2canvas(page, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#ffffff',
+        windowWidth: page.scrollWidth,
+        windowHeight: page.scrollHeight
+      });
+      const imgData = canvas.toDataURL('image/jpeg', 0.95);
+
+      const imgWmm = pxToMm(canvas.width);
+      const imgHmm = pxToMm(canvas.height);
+
+      const scale = Math.min(pageW / imgWmm, pageH / imgHmm);
+      const renderW = imgWmm * scale;
+      const renderH = imgHmm * scale;
+      const x = (pageW - renderW) / 2;
+      const y = (pageH - renderH) / 2;
+
+      if (i>0) pdf.addPage();
+      pdf.addImage(imgData, 'JPEG', x, y, renderW, renderH);
+    }
+
+    setProgress(95, 'حفظ الملف…');
+    pdf.save('booklet.pdf');
+    setProgress(100, 'تم إنشاء ملف PDF بنجاح!');
+  } catch (err) {
+    console.error('خطأ في إنشاء PDF:', err);
+    if (progressText) progressText.textContent = 'حدث خطأ أثناء إنشاء PDF. جرّب تقليل عدد/حجم الصور أو إعادة المحاولة.';
+  } finally {
+    // استعادة الحدود
+    savedBorders.forEach(({el, border}) => el.style.border = border);
+    if (modal) setTimeout(()=>{ modal.style.display = 'none'; }, 700);
+  }
+
+}
+
+
+        function showHelp() {
+            document.getElementById('helpModal').style.display = 'flex';
+        }
+
+        function closeHelp() {
+            document.getElementById('helpModal').style.display = 'none';
+        }
+
+        function showSuccessMessage(message) {
+            const existingMessage = document.querySelector('.success-message');
+            if (existingMessage) {
+                existingMessage.remove();
+            }
+            
+            const successDiv = document.createElement('div');
+            successDiv.className = 'success-message';
+            successDiv.textContent = message;
+            
+            const previewArea = document.querySelector('.preview-area');
+            previewArea.insertBefore(successDiv, previewArea.firstChild);
+            
+            setTimeout(() => {
+                successDiv.remove();
+            }, 4000);
+        }
+
+        // تهيئة الصفحة
+        document.addEventListener('DOMContentLoaded', function() {
+            updatePageCount();
+            updateImageCount();
+            updateWordCount();
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96e5d700c0ff9350',t:'MTc1NTA2MzIyOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
